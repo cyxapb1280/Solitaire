@@ -18,6 +18,16 @@ class DragManager extends Component {
     document.onmousedown = this._onMouseDown.bind(this);
   }
 
+  rollBack (movedElement) {
+    let element = movedElement || this._dragElement;
+
+    element.style.position = this._backUp.position;
+    element.style.left = this._backUp.left;
+    element.style.top = this._backUp.top;
+    element.style.zIndex = this._backUp.zIndex;
+    element.style.opacity = this._backUp.opacity;
+    element.classList.remove('js-moving');
+  }
 
   _onMouseDown(event) {
     if (event.which != 1) return;
@@ -32,17 +42,6 @@ class DragManager extends Component {
     this._downY = event.pageY;
 
     return false;
-  }
-
-  rollBack (movedElement) {
-    let element = movedElement || this._dragElement;
-
-    element.style.position = this._backUp.position;
-    element.style.left = this._backUp.left;
-    element.style.top = this._backUp.top;
-    element.style.zIndex = this._backUp.zIndex;
-    element.style.opacity = this._backUp.opacity;
-    element.classList.remove('js-moving');
   }
 
   _onMouseMove(event) {
@@ -132,7 +131,7 @@ class DragManager extends Component {
   _onDragEnd(dropElem) {
     let data = {
       movingElementId: this._dragElement.dataset.cardId,
-      destinationElementId: dropElem.dataset.homeId || dropElem.dataset.currentHolderId
+      destinationElementId: dropElem.dataset.homeId || dropElem.dataset.pileId || dropElem.dataset.currentHolderId
     };
 
     this._cleanUp();

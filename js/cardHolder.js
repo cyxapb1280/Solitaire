@@ -6,7 +6,7 @@ class CardHolder extends Component {
   constructor(options) {
     super(options);
     this._cards = [];
-    
+
     this._el.addEventListener('click', this._onHolderClick.bind(this));
   }
 
@@ -70,6 +70,6 @@ class CardHolder extends Component {
   };
   
   _onHolderClick(event){
-    this._trigger('holderClick');
+      this._trigger('holderClick');
   }
 }

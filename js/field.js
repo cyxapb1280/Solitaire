@@ -60,6 +60,9 @@ class Field {
       case 'home-3' :
         this._addCardToHome(3, cardId);
         break;
+      default : // card to card or card to empty pile
+        this._addCardToPile(toId, cardId);
+        break;
     }
   }
 
@@ -69,10 +72,13 @@ class Field {
     this._deck.cards = this._cards;
     this._deck.shuffleCards();
 
-    this._el.innerHTML += _.template(this._cardDeckTemplate)({
+    let container = document.createElement('div');
+    container.innerHTML = _.template(this._cardDeckTemplate)({
       cards: this._cards,
       styleStr: str
     });
+
+    this._el.appendChild(container);
   }
 
   _addStartCardsToPiles() {
@@ -104,6 +110,61 @@ class Field {
     }
   }
 
+  _addCardToPile(pileId, cardId) {
+    let cardElement = this._el.querySelector('[data-card-id="' + cardId + '"]');
+    let pileNumber = pileId.slice(-1);
+    let pile = this['_pile' + pileNumber];
+    let card = this._removeCardFromCurrentHolder(cardId);
+
+    if(!pile.cards.length){
+      this._addCardToEmptyPile(pileNumber, cardId);
+      return;
+    }
+
+    let topCardElement = pile.topCardElement;
+
+    if(pile.currentPriority === card.priority + 1 &&
+        this._checkForCorrectSuit(pile.currentSuit, card.suit)){
+
+      this._openTopCard(this._getCardCurrentHolder(cardId));
+
+      pile.cards.push(card);
+      cardElement.style.zIndex = ++this._currrentZindex;
+      cardElement.style.position = 'absolute';
+      cardElement.style.top = 25 + 'px';
+      cardElement.style.left = 0;
+      cardElement.setAttribute('data-current-holder-id', 'pile-' + pileNumber);
+      cardElement.onclick = null;
+
+      topCardElement.appendChild(cardElement);
+    } else {
+      this._returnCardToPreviousHolder(card);
+      this._dragManager.rollBack(cardElement);
+    }
+
+  }
+
+  _addCardToEmptyPile(pileNumber, cardId) {
+    let cardElement = this._el.querySelector('[data-card-id="' + cardId + '"]');
+    let pile = this['_pile' + pileNumber];
+    let card = this._removeCardFromCurrentHolder(cardId);
+
+    if (card.priority === 12) {
+
+      this._openTopCard(this._getCardCurrentHolder(cardId));
+
+      pile.cards.push(card);
+      cardElement.style.zIndex = ++this._currrentZindex;
+      cardElement.style.top = pile.top + 'px';
+      cardElement.style.left = pile.left + 'px';
+      cardElement.setAttribute('data-current-holder-id', 'pile-' + pileNumber);
+      cardElement.onclick = null;
+    } else {
+      this._returnCardToPreviousHolder(card);
+      this._dragManager.rollBack(cardElement);
+    }
+  }
+
   _openTopCard(pileId) {
     if (pileId === 'open-deck') {
       return;
@@ -111,6 +172,11 @@ class Field {
 
     let pileNumber = pileId.slice(-1);
     let pileCards = this['_pile' + pileNumber].cards;
+
+    if (!pileCards.length) {
+      return;
+    }
+
     let card = pileCards[pileCards.length - 1];
     let cardElement = this._el.querySelector('[data-card-id="' + card.id + '"]');
 
@@ -152,10 +218,10 @@ class Field {
   }
 
   _moveCardsFromOpenDeckToDeck() {
-    this._deck.cards =  this._openDeck.cards.slice();
+    this._deck.cards = this._openDeck.cards.slice();
     this._openDeck.cards = [];
 
-    this._deck.cards.forEach(function(card){
+    this._deck.cards.forEach(function (card) {
       let cardElement = document.querySelector('[data-card-id="' + card.id + '"]');
 
       cardElement.style.top = this._deck.top + 'px';
@@ -163,7 +229,9 @@ class Field {
       cardElement.setAttribute('data-current-holder-id', 'deck');
       cardElement.classList.add('js-closed');
       cardElement.classList.remove('js-draggable');
-    });
+    }.bind(this));
+
+    this._deck.topCardElement.onclick = this._onDeckTopCardClick.bind(this);
   }
 
   _addCardToHome(homeNumber, cardId) {
@@ -181,6 +249,7 @@ class Field {
       cardElement.style.top = home.top + 'px';
       cardElement.style.left = home.left + 'px';
       cardElement.setAttribute('data-current-holder-id', 'home-' + homeNumber);
+      cardElement.onclick = null;
     } else {
       this._returnCardToPreviousHolder(card);
       this._dragManager.rollBack(cardElement);
@@ -246,5 +315,10 @@ class Field {
   _getCardCurrentHolder(cardId) {
     let cardElement = this._el.querySelector('[data-card-id="' + cardId + '"]');
     return cardElement.dataset.currentHolderId;
+  }
+
+  _checkForCorrectSuit(firstSuit, secondSuit) {
+    return ((firstSuit == 'hearts' || firstSuit == 'diamonds' && secondSuit == 'clubs' || secondSuit == 'spades') ||
+            (firstSuit == 'clubs' || firstSuit == 'spades' && secondSuit == 'hearts' || secondSuit == 'diamonds'));
   }
 }

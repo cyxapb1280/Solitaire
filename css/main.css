@@ -1,6 +1,7 @@
 body{
   background: #102f41;
 }
+
 .field {
   padding: 10px;
   margin: auto;
@@ -32,6 +33,8 @@ body{
   position: absolute;
   background-image: url(../img/cards/back.png);
 
+  box-shadow: 0 0 1px black;
+
   -webkit-transition: all 0.4s;
   -moz-transition: all 0.4s;
   -o-transition: all 0.4s;
@@ -41,11 +44,12 @@ body{
 
 .js-moving {
   opacity: 0.6;
-  -webkit-transition: all 0.1s;
-  -moz-transition: all 0.1s;
-  -o-transition: all 0.1s;
-  -ms-transition: all 0.1s;
-  transition: all 0.1s;
+
+  -webkit-transition: none;
+  -moz-transition: none;
+  -o-transition: none;
+  -ms-transition: none;
+  transition: none;
 }
 
 img {
@@ -56,6 +60,11 @@ img {
   -ms-user-select: none;
   user-select: none;
 }
+
 .js-closed img {
   display: none;
+}
+
+.js-closed {
+  box-shadow: none;
 }
