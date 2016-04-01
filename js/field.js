@@ -68,6 +68,22 @@ class Field {
     }
   }
 
+  _initializePiles() {
+    for (let i = 0; i < 7; i++) {
+      this['_pile' + i] = new CardHolder({
+        element: this._el.querySelector('[data-pile-id="pile-' + i + '"]')
+      });
+    }
+  }
+
+  _initializeHomes() {
+    for (let i = 0; i < 4; i++) {
+      this['_home' + i] = new CardHolder({
+        element: this._el.querySelector('[data-home-id="home-' + i + '"]')
+      });
+    }
+  }
+
   _addAllCardsToDeck() {
     let str = 'top: ' + this._deck.top + 'px;' + 'left: ' + this._deck.left + 'px;';
 
@@ -110,6 +126,30 @@ class Field {
     }
   }
 
+  _addCardToHome(homeNumber, cardId) {
+    let cardElement = this._el.querySelector('[data-card-id="' + cardId + '"]');
+    let home = this['_home' + homeNumber];
+    let cards = this._removeCardsFromCurrentHolder(cardId);
+    let mainCard = cards[0];
+
+    if (cards.length === 1 &&
+      (home.currentSuit === null || mainCard.suit === home.currentSuit) &&
+      home.currentPriority === mainCard.priority - 1) {
+
+      this._openTopCard(this._getCardCurrentHolder(cardId));
+
+      home.cards.push(mainCard);
+      cardElement.style.zIndex = ++this._currrentZindex;
+      cardElement.style.top = home.top + 'px';
+      cardElement.style.left = home.left + 'px';
+      cardElement.setAttribute('data-current-holder-id', 'home-' + homeNumber);
+      cardElement.onclick = null;
+    } else {
+      this._returnCardsToPreviousHolder(cards);
+      this._dragManager.rollBack(cardElement);
+    }
+  }
+
   _addCardToPile(pileId, cardId) {
     let pileNumber = pileId.slice(-1);
     let pile = this['_pile' + pileNumber];
@@ -137,6 +177,7 @@ class Field {
       cardElement.style.top = pile.top + 'px';
       cardElement.style.left = pile.left + 'px';
       cardElement.setAttribute('data-current-holder-id', 'pile-' + pileNumber);
+      cardElement.classList.add('droppable');
       cardElement.onclick = null;
     } else {
       this._returnCardsToPreviousHolder(cards);
@@ -164,6 +205,7 @@ class Field {
       cardElement.style.top = 25 + 'px';
       cardElement.style.left = 0;
       cardElement.setAttribute('data-current-holder-id', 'pile-' + pileNumber);
+      cardElement.classList.add('droppable');
       cardElement.onclick = null;
 
       topCardElement.appendChild(cardElement);
@@ -195,20 +237,10 @@ class Field {
     this._openCard(cardElement);
   }
 
-  _initializePiles() {
-    for (let i = 0; i < 7; i++) {
-      this['_pile' + i] = new CardHolder({
-        element: this._el.querySelector('[data-pile-id="pile-' + i + '"]')
-      });
-    }
-  }
-
-  _initializeHomes() {
-    for (let i = 0; i < 4; i++) {
-      this['_home' + i] = new CardHolder({
-        element: this._el.querySelector('[data-home-id="home-' + i + '"]')
-      });
-    }
+  _openCard(cardElement) {
+    cardElement.classList.remove('js-closed');
+    cardElement.classList.add('js-draggable');
+    cardElement.classList.add('js-droppable');
   }
 
   _moveCardFromDeckToOpenDeck() {
@@ -240,30 +272,6 @@ class Field {
     }.bind(this));
 
     this._deck.topCardElement.onclick = this._onDeckTopCardClick.bind(this);
-  }
-
-  _addCardToHome(homeNumber, cardId) {
-    let cardElement = this._el.querySelector('[data-card-id="' + cardId + '"]');
-    let home = this['_home' + homeNumber];
-    let cards = this._removeCardsFromCurrentHolder(cardId);
-    let mainCard = cards[0];
-
-    if (cards.length === 1 &&
-      (home.currentSuit === null || mainCard.suit === home.currentSuit) &&
-      home.currentPriority === mainCard.priority - 1) {
-
-      this._openTopCard(this._getCardCurrentHolder(cardId));
-
-      home.cards.push(mainCard);
-      cardElement.style.zIndex = ++this._currrentZindex;
-      cardElement.style.top = home.top + 'px';
-      cardElement.style.left = home.left + 'px';
-      cardElement.setAttribute('data-current-holder-id', 'home-' + homeNumber);
-      cardElement.onclick = null;
-    } else {
-      this._returnCardsToPreviousHolder(cards);
-      this._dragManager.rollBack(cardElement);
-    }
   }
 
   _removeCardsFromCurrentHolder(cardId) {
@@ -309,12 +317,6 @@ class Field {
 
       holder.cards.push(cards[0]);
     }
-  }
-
-  _openCard(cardElement) {
-    cardElement.classList.remove('js-closed');
-    cardElement.classList.add('js-draggable');
-    cardElement.classList.add('js-droppable');
   }
 
   _getCardCurrentHolder(cardId) {

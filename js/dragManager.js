@@ -79,6 +79,18 @@ class DragManager extends Component {
     }
   }
 
+  _tearElementFromParent() {
+    if (!this._dragElement.parentElement.dataset.cardId) {
+      return;
+    }
+
+    let coords = this._getCoords(this._dragElement);
+
+    this._uiCardContainer.appendChild(this._dragElement);
+    this._dragElement.style.top = coords.top + 'px';
+    this._dragElement.style.left = coords.left + 'px';
+  }
+
   _finishDrag(event) {
     var dropElem = this._findDroppable(event);
 
@@ -101,7 +113,6 @@ class DragManager extends Component {
       opacity: element.style.opacity || ''
     };
   }
-
 
   _findDroppable(event) {
     this._dragElement.hidden = true;
@@ -141,18 +152,6 @@ class DragManager extends Component {
     this._shiftX = 0;
     this._shiftY = 0;
     this._movingStarted = false;
-  }
-
-  _tearElementFromParent() {
-    if(!this._dragElement.parentElement.dataset.cardId){
-      return;
-    }
-    
-    let coords = this._getCoords(this._dragElement);
-
-    this._uiCardContainer.appendChild(this._dragElement);
-    this._dragElement.style.top = coords.top + 'px';
-    this._dragElement.style.left = coords.left + 'px';
   }
 
   _getCoords(element) {

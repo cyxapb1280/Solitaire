@@ -1,7 +1,7 @@
 /**
  * Created by Ruslan on 29-Mar-16.
  */
-  
+
 class Component {
   constructor(options) {
     this._el = options.element;
@@ -11,7 +11,15 @@ class Component {
   get element() {
     return this._el;
   }
-  
+
+  get top() {
+    return this._coords.top;
+  }
+
+  get left() {
+    return this._coords.left;
+  }
+
   on(eventName, handler) {
     this._el.addEventListener(eventName, handler);
   }
@@ -26,13 +34,5 @@ class Component {
     let event = new CustomEvent(eventName, options);
 
     this._el.dispatchEvent(event);
-  }
-
-  get top() {
-    return this._coords.top;
-  }
-
-  get left() {
-    return this._coords.left;
   }
 }
