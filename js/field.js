@@ -111,24 +111,54 @@ class Field {
   }
 
   _addCardToPile(pileId, cardId) {
-    let cardElement = this._el.querySelector('[data-card-id="' + cardId + '"]');
     let pileNumber = pileId.slice(-1);
     let pile = this['_pile' + pileNumber];
-    let card = this._removeCardFromCurrentHolder(cardId);
 
     if (!pile.cards.length) {
       this._addCardToEmptyPile(pileNumber, cardId);
-      return;
+    } else {
+      this._addCardToNonemptyPile(pileNumber, cardId);
     }
+  }
 
-    let topCardElement = pile.topCardElement;
+  _addCardToEmptyPile(pileNumber, cardId) {
+    let pile = this['_pile' + pileNumber];
+    let cards = this._removeCardsFromCurrentHolder(cardId);
+    let mainCard = cards[0];
+    let cardElement = this._el.querySelector('[data-card-id="' + cardId + '"]');
 
-    if (pile.currentPriority === card.priority + 1 &&
-      this._checkForCorrectSuit(pile.currentSuit, card.suit)) {
+
+    if (mainCard.priority === 12) {
 
       this._openTopCard(this._getCardCurrentHolder(cardId));
 
-      pile.cards.push(card);
+      pile.cards = pile.cards.concat(cards);
+      cardElement.style.zIndex = ++this._currrentZindex;
+      cardElement.style.top = pile.top + 'px';
+      cardElement.style.left = pile.left + 'px';
+      cardElement.setAttribute('data-current-holder-id', 'pile-' + pileNumber);
+      cardElement.onclick = null;
+    } else {
+      this._returnCardsToPreviousHolder(cards);
+      this._dragManager.rollBack(cardElement);
+    }
+  }
+
+  _addCardToNonemptyPile(pileNumber, cardId) {
+    let pile = this['_pile' + pileNumber];
+    let cards = this._removeCardsFromCurrentHolder(cardId);
+    let mainCard = cards[0];
+
+    let topCardElement = pile.topCardElement;
+    let cardElement = this._el.querySelector('[data-card-id="' + cardId + '"]');
+
+    if (pile.currentPriority === mainCard.priority + 1 &&
+      this._checkForCorrectSuit(pile.currentSuit, mainCard.suit)) {
+
+      this._openTopCard(this._getCardCurrentHolder(cardId));
+
+      pile.cards = pile.cards.concat(cards);
+
       cardElement.style.zIndex = ++this._currrentZindex;
       cardElement.style.position = 'absolute';
       cardElement.style.top = 25 + 'px';
@@ -138,29 +168,7 @@ class Field {
 
       topCardElement.appendChild(cardElement);
     } else {
-      this._returnCardToPreviousHolder(card);
-      this._dragManager.rollBack(cardElement);
-    }
-
-  }
-
-  _addCardToEmptyPile(pileNumber, cardId) {
-    let cardElement = this._el.querySelector('[data-card-id="' + cardId + '"]');
-    let pile = this['_pile' + pileNumber];
-    let card = this._removeCardFromCurrentHolder(cardId);
-
-    if (card.priority === 12) {
-
-      this._openTopCard(this._getCardCurrentHolder(cardId));
-
-      pile.cards.push(card);
-      cardElement.style.zIndex = ++this._currrentZindex;
-      cardElement.style.top = pile.top + 'px';
-      cardElement.style.left = pile.left + 'px';
-      cardElement.setAttribute('data-current-holder-id', 'pile-' + pileNumber);
-      cardElement.onclick = null;
-    } else {
-      this._returnCardToPreviousHolder(card);
+      this._returnCardsToPreviousHolder(cards);
       this._dragManager.rollBack(cardElement);
     }
   }
@@ -237,72 +245,69 @@ class Field {
   _addCardToHome(homeNumber, cardId) {
     let cardElement = this._el.querySelector('[data-card-id="' + cardId + '"]');
     let home = this['_home' + homeNumber];
-    let card = this._removeCardFromCurrentHolder(cardId);
+    let cards = this._removeCardsFromCurrentHolder(cardId);
+    let mainCard = cards[0];
 
-    if ((home.currentSuit === null || card.suit === home.currentSuit) &&
-      home.currentPriority === card.priority - 1) {
+    if (cards.length === 1 &&
+      (home.currentSuit === null || mainCard.suit === home.currentSuit) &&
+      home.currentPriority === mainCard.priority - 1) {
 
       this._openTopCard(this._getCardCurrentHolder(cardId));
 
-      home.cards.push(card);
+      home.cards.push(mainCard);
       cardElement.style.zIndex = ++this._currrentZindex;
       cardElement.style.top = home.top + 'px';
       cardElement.style.left = home.left + 'px';
       cardElement.setAttribute('data-current-holder-id', 'home-' + homeNumber);
       cardElement.onclick = null;
     } else {
-      this._returnCardToPreviousHolder(card);
+      this._returnCardsToPreviousHolder(cards);
       this._dragManager.rollBack(cardElement);
     }
   }
 
-  _removeCardFromCurrentHolder(cardId) {
+  _removeCardsFromCurrentHolder(cardId) {
     let currentHolderId = this._getCardCurrentHolder(cardId);
-    let holder;
+    let cards = [];
 
     if (currentHolderId.slice(0, 4) === 'home') {
-      let homeNumber = currentHolderId.slice(-1);
-      holder = this['_home' + homeNumber];
-
-      return holder.cards.pop();
-    }
-
-    if (currentHolderId.slice(0, 4) === 'pile') {
-      let pileNumber = currentHolderId.slice(-1);
-      holder = this['_pile' + pileNumber];
-
-      return holder.cards.pop();
+      cards.push(this._removeFromHome(currentHolderId));
     }
 
     if (currentHolderId === 'open-deck') {
-      holder = this._openDeck;
-
-      return holder.cards.pop();
+      cards.push(this._removeFromOpenDeck());
     }
+
+    if (currentHolderId.slice(0, 4) === 'pile') {
+      cards = this._removeFromPile(currentHolderId, cardId);
+    }
+
+    return cards;
   }
 
-  _returnCardToPreviousHolder(card) {
-    let currentHolderId = this._getCardCurrentHolder(card.id);
+  _returnCardsToPreviousHolder(cards) {
+    let currentHolderId = this._getCardCurrentHolder(cards[0].id);
     let holder;
 
     if (currentHolderId.slice(0, 4) === 'home') {
       let homeNumber = currentHolderId.slice(-1);
       holder = this['_home' + homeNumber];
 
-      return holder.cards.push(card);
+      holder.cards.push(cards[0]);
     }
 
     if (currentHolderId.slice(0, 4) === 'pile') {
       let pileNumber = currentHolderId.slice(-1);
       holder = this['_pile' + pileNumber];
 
-      return holder.cards.push(card);
+
+      holder.cards = holder.cards.concat(cards);
     }
 
     if (currentHolderId === 'open-deck') {
       holder = this._openDeck;
 
-      return holder.cards.push(card);
+      holder.cards.push(cards[0]);
     }
   }
 
@@ -318,14 +323,36 @@ class Field {
   }
 
   _checkForCorrectSuit(firstSuit, secondSuit) {
-    if((firstSuit === 'hearts' || firstSuit === 'diamonds') && (secondSuit === 'clubs' || secondSuit === 'spades')){
+    if ((firstSuit === 'hearts' || firstSuit === 'diamonds') && (secondSuit === 'clubs' || secondSuit === 'spades')) {
       return true;
     }
 
-    if((firstSuit === 'clubs' || firstSuit === 'spades') && (secondSuit === 'hearts' || secondSuit === 'diamonds')){
+    if ((firstSuit === 'clubs' || firstSuit === 'spades') && (secondSuit === 'hearts' || secondSuit === 'diamonds')) {
       return true;
     }
 
     return false;
+  }
+
+  _removeFromHome(currentHolderId) {
+    let homeNumber = currentHolderId.slice(-1);
+    let holder = this['_home' + homeNumber];
+    return holder.cards.pop();
+  }
+
+  _removeFromOpenDeck() {
+    let holder = this._openDeck;
+    return holder.cards.pop();
+  }
+
+  _removeFromPile(currentHolderId, cardId) {
+    let pileNumber = currentHolderId.slice(-1);
+    let holder = this['_pile' + pileNumber];
+
+    let cardIndex = holder.cards.findIndex(function (card) {
+      return card.id === cardId;
+    });
+
+    return holder.cards.splice(cardIndex);
   }
 }
