@@ -53,23 +53,20 @@ class CardHolder extends Component {
     }
   }
 
-  shuffleCards(){
-    this._cards = CardHolder.shuffle(this._cards);
-  }
+  shuffleCards() {
+    let j, temp;
 
-  static shuffle(array, b) {
-    var i = array.length, j, t;
-    while (i) {
+    for (let i = this._cards.length; i !== 0; i--) {
       j = Math.floor(( i-- ) * Math.random());
-      t = b && typeof array[i].shuffle !== 'undefined' ? array[i].shuffle() : array[i];
-      array[i] = array[j];
-      array[j] = t;
-    }
 
-    return array;
-  };
-  
-  _onHolderClick(event){
-      this._trigger('holderClick');
+      temp = this._cards[i];
+      this._cards[i] = this._cards[j];
+      this._cards[j] = temp;
+    }
   }
+
+  _onHolderClick(event) {
+    this._trigger('holderClick');
+  }
+  
 }

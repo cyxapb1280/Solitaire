@@ -1,7 +1,7 @@
 /**
  * Created by Ruslan on 29-Mar-16.
  */
-  
+
 class DragManager extends Component {
   constructor(options) {
     super(options);
@@ -11,14 +11,14 @@ class DragManager extends Component {
     this._downY = 0;
     this._shiftX = 0;
     this._shiftY = 0;
-    this._movingStarted =false;
+    this._movingStarted = false;
 
     document.onmousemove = this._onMouseMove.bind(this);
     document.onmouseup = this._onMouseUp.bind(this);
     document.onmousedown = this._onMouseDown.bind(this);
   }
 
-  rollBack (movedElement) {
+  rollBack(movedElement) {
     let element = movedElement || this._dragElement;
 
     element.style.position = this._backUp.position;
@@ -37,7 +37,6 @@ class DragManager extends Component {
 
     this._dragElement = element;
 
-    // запомним, что элемент нажат на текущих координатах pageX/pageY
     this._downX = event.pageX;
     this._downY = event.pageY;
 
@@ -45,31 +44,25 @@ class DragManager extends Component {
   }
 
   _onMouseMove(event) {
-    if (!this._dragElement) return; // элемент не зажат
+    if (!this._dragElement) return;
 
-    if (!this._movingStarted) { // если перенос не начат...
+    if (!this._movingStarted) {
       var moveX = event.pageX - this._downX;
       var moveY = event.pageY - this._downY;
 
-      // если мышь передвинулась в нажатом состоянии недостаточно далеко
       if (Math.abs(moveX) < 3 && Math.abs(moveY) < 3) {
         return;
       }
 
-      // начинаем перенос
       this._movingStarted = true;
       this._createBackUp();
-      this._dragElement.classList.add('js-moving'); // сжедать элемент полупрозрачным
+      this._dragElement.classList.add('js-moving');
 
-      // создать вспомогательные свойства shiftX/shiftY
       var coords = this._getCoords(this._dragElement);
       this._shiftX = this._downX - coords.left;
       this._shiftY = this._downY - coords.top;
-
-      this._startDrag(event); // отобразить начало переноса
     }
 
-    // отобразить перенос объекта при каждом движении мыши
     this._dragElement.style.left = event.pageX - this._shiftX + 'px';
     this._dragElement.style.top = event.pageY - this._shiftY + 'px';
 
@@ -77,7 +70,7 @@ class DragManager extends Component {
   }
 
   _onMouseUp(event) {
-    if (this._dragElement) { // если перенос идет
+    if (this._dragElement) {
       this._finishDrag(event);
     }
   }
@@ -93,7 +86,6 @@ class DragManager extends Component {
   }
 
   _createBackUp(event) {
-    // запомнить старые свойства, чтобы вернуться к ним при отмене переноса
     var element = this._dragElement;
 
     this._backUp = {
@@ -105,23 +97,15 @@ class DragManager extends Component {
     };
   }
 
-  _startDrag(event) {
-    this._dragElement.style.zIndex = 999;
-    this._dragElement.style.position = 'absolute';
-  }
 
   _findDroppable(event) {
-    // спрячем переносимый элемент
     this._dragElement.hidden = true;
 
-    // получить самый вложенный элемент под курсором мыши
     var elementBelow = document.elementFromPoint(event.clientX, event.clientY);
 
-    // показать переносимый элемент обратно
     this._dragElement.hidden = false;
 
     if (elementBelow == null) {
-      // такое возможно, если курсор мыши "вылетел" за границу окна
       return null;
     }
 
@@ -144,7 +128,7 @@ class DragManager extends Component {
     this._cleanUp();
   }
 
-  _cleanUp(){
+  _cleanUp() {
     this._dragElement.classList.remove('js-moving');
     this._dragElement = null;
     this._downX = 0;
@@ -154,7 +138,7 @@ class DragManager extends Component {
     this._movingStarted = false;
   }
 
-  _getCoords(element) { // кроме IE8-
+  _getCoords(element) {
     var box = element.getBoundingClientRect();
 
     return {

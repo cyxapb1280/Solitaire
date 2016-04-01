@@ -9,6 +9,7 @@ class Field {
     this._currrentZindex = 50;
 
     this._cardDeckTemplate = document.getElementById('cards-deck-template').innerHTML;
+    this._uiCardContainer = this._el.querySelector('[data-component="ui-card-container"]');
 
     this._deck = new CardHolder({
       element: this._el.querySelector('[data-component="deck"]')
@@ -19,7 +20,8 @@ class Field {
     });
 
     this._dragManager = new DragManager({
-      element: this._el.querySelector('[data-component="drag-manager"]')
+      element: this._el.querySelector('[data-component="drag-manager"]'),
+      uiCardsContainer: this._uiCardContainer
     });
 
     this._initializePiles();
@@ -72,13 +74,11 @@ class Field {
     this._deck.cards = this._cards;
     this._deck.shuffleCards();
 
-    let container = document.createElement('div');
-    container.innerHTML = _.template(this._cardDeckTemplate)({
+    this._uiCardContainer.innerHTML = _.template(this._cardDeckTemplate)({
       cards: this._cards,
       styleStr: str
     });
 
-    this._el.appendChild(container);
   }
 
   _addStartCardsToPiles() {
@@ -116,15 +116,15 @@ class Field {
     let pile = this['_pile' + pileNumber];
     let card = this._removeCardFromCurrentHolder(cardId);
 
-    if(!pile.cards.length){
+    if (!pile.cards.length) {
       this._addCardToEmptyPile(pileNumber, cardId);
       return;
     }
 
     let topCardElement = pile.topCardElement;
 
-    if(pile.currentPriority === card.priority + 1 &&
-        this._checkForCorrectSuit(pile.currentSuit, card.suit)){
+    if (pile.currentPriority === card.priority + 1 &&
+      this._checkForCorrectSuit(pile.currentSuit, card.suit)) {
 
       this._openTopCard(this._getCardCurrentHolder(cardId));
 
@@ -319,6 +319,6 @@ class Field {
 
   _checkForCorrectSuit(firstSuit, secondSuit) {
     return ((firstSuit == 'hearts' || firstSuit == 'diamonds' && secondSuit == 'clubs' || secondSuit == 'spades') ||
-            (firstSuit == 'clubs' || firstSuit == 'spades' && secondSuit == 'hearts' || secondSuit == 'diamonds'));
+    (firstSuit == 'clubs' || firstSuit == 'spades' && secondSuit == 'hearts' || secondSuit == 'diamonds'));
   }
 }
