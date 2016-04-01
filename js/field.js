@@ -318,7 +318,14 @@ class Field {
   }
 
   _checkForCorrectSuit(firstSuit, secondSuit) {
-    return ((firstSuit == 'hearts' || firstSuit == 'diamonds' && secondSuit == 'clubs' || secondSuit == 'spades') ||
-    (firstSuit == 'clubs' || firstSuit == 'spades' && secondSuit == 'hearts' || secondSuit == 'diamonds'));
+    if((firstSuit === 'hearts' || firstSuit === 'diamonds') && (secondSuit === 'clubs' || secondSuit === 'spades')){
+      return true;
+    }
+
+    if((firstSuit === 'clubs' || firstSuit === 'spades') && (secondSuit === 'hearts' || secondSuit === 'diamonds')){
+      return true;
+    }
+
+    return false;
   }
 }
