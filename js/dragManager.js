@@ -12,6 +12,7 @@ class DragManager extends Component {
     this._shiftX = 0;
     this._shiftY = 0;
     this._movingStarted = false;
+    this._uiCardContainer = options.uiCardsContainer;
 
     document.onmousemove = this._onMouseMove.bind(this);
     document.onmouseup = this._onMouseUp.bind(this);
@@ -20,6 +21,8 @@ class DragManager extends Component {
 
   rollBack(movedElement) {
     let element = movedElement || this._dragElement;
+
+    this._backUp.parent.appendChild(element);
 
     element.style.position = this._backUp.position;
     element.style.left = this._backUp.left;
@@ -56,6 +59,7 @@ class DragManager extends Component {
 
       this._movingStarted = true;
       this._createBackUp();
+      this._tearElementFromParent();
       this._dragElement.classList.add('js-moving');
 
       var coords = this._getCoords(this._dragElement);
@@ -89,6 +93,7 @@ class DragManager extends Component {
     var element = this._dragElement;
 
     this._backUp = {
+      parent: element.parentElement,
       position: element.position || '',
       left: element.style.left || '',
       top: element.style.top || '',
@@ -136,6 +141,18 @@ class DragManager extends Component {
     this._shiftX = 0;
     this._shiftY = 0;
     this._movingStarted = false;
+  }
+
+  _tearElementFromParent() {
+    if(!this._dragElement.parentElement.dataset.cardId){
+      return;
+    }
+    
+    let coords = this._getCoords(this._dragElement);
+
+    this._uiCardContainer.appendChild(this._dragElement);
+    this._dragElement.style.top = coords.top + 'px';
+    this._dragElement.style.left = coords.left + 'px';
   }
 
   _getCoords(element) {
