@@ -143,6 +143,7 @@ class Field {
       cardElement.style.top = home.top + 'px';
       cardElement.style.left = home.left + 'px';
       cardElement.setAttribute('data-current-holder-id', 'home-' + homeNumber);
+      cardElement.classList.add('js-droppable');
       cardElement.onclick = null;
     } else {
       this._returnCardsToPreviousHolder(cards);
@@ -177,7 +178,7 @@ class Field {
       cardElement.style.top = pile.top + 'px';
       cardElement.style.left = pile.left + 'px';
       cardElement.setAttribute('data-current-holder-id', 'pile-' + pileNumber);
-      cardElement.classList.add('droppable');
+      cardElement.classList.add('js-droppable');
       cardElement.onclick = null;
     } else {
       this._returnCardsToPreviousHolder(cards);
@@ -200,15 +201,15 @@ class Field {
 
       pile.cards = pile.cards.concat(cards);
 
-      cardElement.style.zIndex = ++this._currrentZindex;
       cardElement.style.position = 'absolute';
       cardElement.style.top = 25 + 'px';
       cardElement.style.left = 0;
       cardElement.setAttribute('data-current-holder-id', 'pile-' + pileNumber);
-      cardElement.classList.add('droppable');
+      cardElement.classList.add('js-droppable');
       cardElement.onclick = null;
 
       topCardElement.appendChild(cardElement);
+      cardElement.style.zIndex = ++this._currrentZindex;
     } else {
       this._returnCardsToPreviousHolder(cards);
       this._dragManager.rollBack(cardElement);
