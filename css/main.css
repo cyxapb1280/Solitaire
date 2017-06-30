@@ -1,0 +1,84 @@
+body{
+  background: #102f41;
+}
+
+.field {
+  padding: 10px;
+  margin: auto;
+  display: inline-block;
+  width: 1050px;
+}
+
+.card-holder {
+  width: 130px;
+  height: 190px;
+  background: white;
+  opacity: 0.05;
+  margin: 10px;
+  display: inline-block;
+}
+
+.pile {
+  margin-top: 100px;
+  float: left;
+}
+
+.home {
+  float: right;
+}
+
+.card {
+  width: 130px;
+  height: 190px;
+  position: absolute;
+  background-image: url(../img/cards/back.png);
+
+  box-shadow: 0 0 1px black;
+
+  -webkit-transition: all 0.4s;
+  -moz-transition: all 0.4s;
+  -o-transition: all 0.4s;
+  -ms-transition: all 0.4s;
+  transition: all 0.4s;
+}
+
+.card:hover {
+  box-shadow: 0 0 10px 0 aqua;
+}
+
+.js-moving {
+  opacity: 0.6;
+  z-index: 999;
+  position: absolute;
+
+  -webkit-transition: none;
+  -moz-transition: none;
+  -o-transition: none;
+  -ms-transition: none;
+  transition: none;
+}
+
+.js-moving:hover {
+  box-shadow: none;
+}
+
+img {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.js-closed img {
+  display: none;
+}
+
+.js-closed {
+  box-shadow: none;
+}
+
+.js-closed:hover {
+  box-shadow: none;
+}
